@@ -107,12 +107,36 @@ void parse_file ( char * filename,
       sscanf(line, "%lf %lf %lf", &x, &y, &z);
       add_circle(pm, x, y, z, 0.01);
       //printf( "%lf %lf %lf\n", x, y, z);
-    }    
+    }
+
+		// New Code
+		
+		else if ( strncmp(line, "box", strlen(line)) == 0 ) {
+      //printf("BOX!\n");
+      fgets(line, 255, f);
+      sscanf(line, "%lf %lf %lf %lf %lf %lf", &x, &y, &z, &x1, &y1, &z1);
+      add_box(pm, x, y, z, x1, y1, z1);
+    }  
+    else if ( strncmp(line, "torus", strlen(line)) == 0 ) {
+      //printf("TORUS!\n");
+      fgets(line, 255, f);
+      sscanf(line, "%lf %lf %lf %lf", &x, &y, &x1, &y1);
+      add_torus(pm, x, y, x1, y1, 0.02);
+    }   
+    else if ( strncmp(line, "sphere", strlen(line)) == 0 ) {
+      //printf("SPHERE!\n");
+      fgets(line, 255, f);
+      sscanf(line, "%lf %lf %lf", &x, &y, &z);
+      add_sphere(pm, x, y, z, 0.01);
+    }
+
+		// End New Code
+		
     else if ( strncmp(line, "bezier", strlen(line)) == 0 ) {
       //printf("BEZIER\n");
       fgets(line, 255, f);
       sscanf(line, "%lf %lf %lf %lf %lf %lf %lf %lf",
-	     &x1, &y1, &x2, &y2, &x3, &y3, &x4, &y4);
+						 &x1, &y1, &x2, &y2, &x3, &y3, &x4, &y4);
       add_curve(pm, x1, y1, x2, y2, x3, y3, x4, y4, 0.01, BEZIER_MODE );
       //printf( "%lf %lf %lf\n", x, y, z);
     }    
@@ -120,7 +144,7 @@ void parse_file ( char * filename,
       //printf("HERMITE\n");
       fgets(line, 255, f);
       sscanf(line, "%lf %lf %lf %lf %lf %lf %lf %lf",
-	     &x1, &y1, &x2, &y2, &x3, &y3, &x4, &y4);
+						 &x1, &y1, &x2, &y2, &x3, &y3, &x4, &y4);
       add_curve(pm, x1, y1, x2, y2, x3, y3, x4, y4, 0.01, HERMITE_MODE );
       //printf( "%lf %lf %lf\n", x, y, z);
     }    

@@ -25,17 +25,32 @@
   jdyrlandweaver
   ====================*/
 void add_sphere( struct matrix * points, 
-		 double cx, double cy, double r, 
-		 double step ) {
-  
+								 double cx, double cy, double r, 
+								 double step ) {
+
+	
+  int col;
+  struct matrix *temp;
+	
+  temp = new_matrix(4,1);
+	generate_sphere(temp, cx, cy, r, step);
+	for(col = 0; col < temp->cols; col++) {
+		add_edge(points,
+						 temp->m[0][col],
+						 temp->m[1][col],
+						 temp->m[2][col],
+						 temp->m[0][col],
+						 temp->m[1][col],
+						 temp->m[2][col]);
+	}
 }
 
 /*======== void generate_sphere() ==========
   Inputs:   struct matrix * points
-            double cx
-	    double cy
-	    double r
-	    double step  
+	double cx
+	double cy
+	double r
+	double step  
   Returns: 
 
   Generates all the points along the surface of a 
@@ -47,17 +62,38 @@ void add_sphere( struct matrix * points,
   jdyrlandweaver
   ====================*/
 void generate_sphere( struct matrix * points, 
-		      double cx, double cy, double r, 
-		      double step ) {
-}    
+											double cx, double cy, double r, 
+											double step ) {
+  double i;
+  struct matrix * temp;
+	/* from notes */
+	/*  1     0        0     0   rcos(theta)   x */
+	/* 	0 cos(phi) -sin(phi) 0 * rsin(theta) = y */
+	/* 	0 sin(phi)  cos(phi) 0       1         z */
+	/* 	0     0        0     1       0           */
+
+	
+	for (i = 0; i < M_PI / 2; i += step) {
+		add_circle(points, cx, cy, r, step);
+
+		temp = make_translate(-1*cx, 0, 0);
+
+		//rotate
+		matrix_mult(make_rotX(i), temp);
+		matrix_mult(temp, points);
+
+		temp = make_translate(cx, 0, 0);
+		matrix_mult(temp, points);
+	}
+}  
 
 /*======== void add_torus() ==========
   Inputs:   struct matrix * points
-            double cx
-	    double cy
-	    double r1
-	    double r2
-	    double step  
+	double cx
+	double cy
+	double r1
+	double r2
+	double step  
   Returns: 
 
   adds all the points required to make a torus
@@ -70,16 +106,30 @@ void generate_sphere( struct matrix * points,
   jdyrlandweaver
   ====================*/
 void add_torus( struct matrix * points, 
-		double cx, double cy, double r1, double r2, 
-		double step ) {
-}
+								double cx, double cy, double r1, double r2, 
+								double step ) {
+  struct matrix *temp;
+  temp = new_matrix(4,1);
 
+  generate_torus(temp, cx, cy, r1, r2, step);
+
+  int col;
+  for(col = 0; col < temp->cols; col++) {
+    add_edge(points,
+						 temp->m[0][col],
+						 temp->m[1][col],
+						 temp->m[2][col],
+						 temp->m[0][col],
+						 temp->m[1][col],
+						 temp->m[2][col]);
+  }
+}
 /*======== void generate_torus() ==========
   Inputs:   struct matrix * points
-            double cx
-	    double cy
-	    double r
-	    double step  
+	double cx
+	double cy
+	double r
+	double step  
   Returns: 
 
   Generates all the points along the surface of a 
@@ -90,18 +140,31 @@ void add_torus( struct matrix * points,
   jdyrlandweaver
   ====================*/
 void generate_torus( struct matrix * points, 
-		     double cx, double cy, double r1, double r2, 
-		     double step ) {
+										 double cx, double cy, double r1, double r2, 
+										 double step ) {
+  double i;
+  struct matrix * temp;
+  
+  for (i = 0; i < M_PI; i += step) {
+    add_circle(points, cx, cy, r2 - r1, step);
+    
+    temp = make_translate(-1*cx + r1, 0, 0);
+    matrix_mult(make_rotZ(i), temp);
+    matrix_mult(temp, points);
+
+    temp = make_translate(cx - r1, 0, 0);
+    matrix_mult(temp, points);
+  }
 }
 
 /*======== void add_box() ==========
   Inputs:   struct matrix * points
-            double x
-	    double y
-	    double z
-	    double width
-	    double height
-	    double depth
+	double x
+	double y
+	double z
+	double width
+	double height
+	double depth
   Returns: 
 
   add the points for a rectagular prism whose 
@@ -110,17 +173,29 @@ void generate_torus( struct matrix * points,
 
   jdyrlandweaver
   ====================*/
+
 void add_box( struct matrix * points,
-	      double x, double y, double z,
-	      double width, double height, double depth ) {
-}
+							double x, double y, double z,
+							double width, double height, double depth ) {
+	
+	// Initial edge, add corresponding values to shift it 
+  add_edge(points, x, y, z, x, y, z);
+  add_edge(points, x + width, y, z, x + width, y, z);
+  add_edge(points, x, y + height, z, x, y + height, z);
+  add_edge(points, x + width, y + height, z, x + width, y + height, z);
   
+  add_edge(points, x, y, z + depth, x, y, z + depth);
+  add_edge(points, x + width, y, z + depth, x + width, y, z + depth);
+  add_edge(points, x, y + height, z + depth, x, y + height, z + depth);
+  add_edge(points, x + width, y + height, z + depth, x + width, y + height, z + depth);
+}
+
 /*======== void add_circle() ==========
   Inputs:   struct matrix * points
-            double cx
-	    double cy
-	    double y
-	    double step  
+	double cx
+	double cy
+	double y
+	double step  
   Returns: 
 
 
@@ -128,8 +203,8 @@ void add_box( struct matrix * points,
   jdyrlandweaver
   ====================*/
 void add_circle( struct matrix * points, 
-		 double cx, double cy, 
-		 double r, double step ) {
+								 double cx, double cy, 
+								 double r, double step ) {
   
   double x0, y0, x, y, t;
   
