@@ -75,9 +75,9 @@ void parse_file ( char * filename,
   double angle;
   color g;
 
-  g.red = 255;
-  g.green = 0;
-  g.blue = 255;
+  g.red = 0;
+  g.green = 255;
+  g.blue = 155;
   
   clear_screen(s);
 
